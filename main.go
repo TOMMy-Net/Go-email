@@ -20,7 +20,7 @@ type Email struct {
 	Email_field     string
 	Password_field  string
 	Text_field      string
-	Email_field_rec string
+	Email_field_rec []string
 }
 
 func (e Email) SendEmail() {
@@ -40,9 +40,10 @@ func (e Email) SendEmail() {
 	err := smtp.SendMail(host+":"+port, auth, e.Email_field, []string(e.Email_field_rec), []byte(e.Text_field))
 	if err != nil {
 		log.Println(err)
+
 		
-		fmt.Println("Sending email...")
 	}
+  fmt.Println("Sending email...")
 }
 func SendForm(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" && r.URL.Path == "/action" {
@@ -51,12 +52,12 @@ func SendForm(w http.ResponseWriter, r *http.Request) {
 			log.Println(err)
 		}
 		data := Email{
-			Email_field:    r.FormValue("email"),
-			Password_field: r.FormValue("password"),
-			Text_field:     r.FormValue("message"),
-      Email_field_rec: r.FormValue("email2"),
+			Email_field:     r.FormValue("email"),
+			Password_field:  r.FormValue("password"),
+			Text_field:      r.FormValue("message"),
+			Email_field_rec: []string{r.FormValue("email2")},
 		}
-		
+
 		data.SendEmail()
 		fmt.Fprint(w, data)
 	} else {
