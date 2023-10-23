@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mailing Form</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <form id="mailingForm" action="/action" method="post">
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+        <br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        <br>
+        <label for="cons">Consent to Terms and Conditions:</label>
+        <input type="checkbox" id="cons" name="cons" required>
+        <br>
+        <button type="submit">Submit</button>
+    </form>
+
+</body>
+</html>
