@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"net/smtp"
+	"strconv"
 	"strings"
 	"text/template"
 )
@@ -23,7 +24,7 @@ type Email struct {
 	Email_field_rec []string
 }
 
-func (e Email) SendEmail() {
+func (e Email) SendEmail() error {
 	var port string
 	var host string
 	switch (strings.Split(e.Email_field, "@"))[1] {
@@ -37,13 +38,15 @@ func (e Email) SendEmail() {
 	}
 
 	auth := smtp.PlainAuth("", e.Email_field, e.Password_field, host)
+
 	err := smtp.SendMail(host+":"+port, auth, e.Email_field, []string(e.Email_field_rec), []byte(e.Text_field))
 	if err != nil {
-		log.Println(err)
+		return err
 
-		
 	}
-  fmt.Println("Sending email...")
+	fmt.Println("Sending email...")
+	return nil
+
 }
 func SendForm(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" && r.URL.Path == "/action" {
@@ -57,9 +60,22 @@ func SendForm(w http.ResponseWriter, r *http.Request) {
 			Text_field:      r.FormValue("message"),
 			Email_field_rec: []string{r.FormValue("email2")},
 		}
+		messageNumber, err := strconv.Atoi(r.FormValue("message_number"))
+		if err != nil {
+			// Handle the error appropriately
+			fmt.Fprint(w, err)
+		}
+		for i := 0; i <= messageNumber; i++ {
 
-		data.SendEmail()
-		fmt.Fprint(w, data)
+			err = data.SendEmail()
+			if err != nil {
+				fmt.Fprint(w, err)
+				break
+			} else {
+				fmt.Fprint(w, data)
+			}
+		}
+
 	} else {
 		ts, err := template.ParseFiles("static/form.html")
 		if err != nil {
@@ -73,10 +89,11 @@ func SendForm(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+  mux := http.NewServeMux()
 	// 1. Create a new http server listening on port 8080
-	http.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir("./static"))))
+	mux.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir("./static"))))
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		//http.ServeFile(w, r, "static/form.html")
 		ts, err := template.ParseFiles("static/form.html")
 		if err != nil {
@@ -90,6 +107,6 @@ func main() {
 			http.Error(w, "Internal Server Error", 500)
 		}
 	})
-	http.HandleFunc("/action", SendForm)
-	log.Fatal(http.ListenAndServe(":80", nil))
+	mux.HandleFunc("/action", SendForm)
+	log.Fatal(http.ListenAndServe(":80", mux))
 }
