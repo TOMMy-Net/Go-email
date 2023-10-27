@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"net/smtp"
+	"reflect"
 	"strconv"
 	"strings"
 	"text/template"
@@ -60,6 +61,14 @@ func SendForm(w http.ResponseWriter, r *http.Request) {
 			Text_field:      r.FormValue("message"),
 			Email_field_rec: []string{r.FormValue("email2")},
 		}
+		val := reflect.ValueOf(data)
+		for i := 0; i <= val.NumField(); i++ {
+			if (val.Field(i).Interface()) == "" {
+				http.Redirect(w, r, "/", http.StatusSeeOther)
+				break
+			}
+
+		}
 		messageNumber, err := strconv.Atoi(r.FormValue("message_number"))
 		if err != nil {
 			// Handle the error appropriately
@@ -70,11 +79,16 @@ func SendForm(w http.ResponseWriter, r *http.Request) {
 			err = data.SendEmail()
 			if err != nil {
 				fmt.Fprint(w, err)
-				break
-			} else {
-				fmt.Fprint(w, data)
+				return
 			}
 		}
+		ts, err := template.ParseFiles("static/answer.html")
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, "Internal Server Error", 500)
+			return
+		}
+		ts.Execute(w, nil)
 
 	} else {
 		ts, err := template.ParseFiles("static/form.html")
@@ -87,26 +101,27 @@ func SendForm(w http.ResponseWriter, r *http.Request) {
 
 	}
 }
+func start_file(w http.ResponseWriter, r *http.Request) {
+	ts, err := template.ParseFiles("static/form.html")
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error", 500)
+		return
+	}
+	err = ts.Execute(w, nil)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error", 500)
+	}
+}
 
 func main() {
-  mux := http.NewServeMux()
+	mux := http.NewServeMux()
 	// 1. Create a new http server listening on port 8080
 	mux.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir("./static"))))
 
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		//http.ServeFile(w, r, "static/form.html")
-		ts, err := template.ParseFiles("static/form.html")
-		if err != nil {
-			log.Println(err.Error())
-			http.Error(w, "Internal Server Error", 500)
-			return
-		}
-		err = ts.Execute(w, nil)
-		if err != nil {
-			log.Println(err.Error())
-			http.Error(w, "Internal Server Error", 500)
-		}
-	})
+	mux.HandleFunc("/", start_file)
+
 	mux.HandleFunc("/action", SendForm)
 	log.Fatal(http.ListenAndServe(":80", mux))
 }

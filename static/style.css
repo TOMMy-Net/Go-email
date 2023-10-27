@@ -27,17 +27,43 @@ input[type="checkbox"] {
     margin-top: 5px;
 }
 
-button[type="submit"] {
-    width: 100%;
-    padding: 10px;
-    margin: 7px 0;
-    background-color: #007bff;
-    color: #ffffff;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
+
+button {
+  font-size: 12px;
+  font-family: sans-serif;
+  cursor: pointer;
 }
 
-button[type="submit"]:hover {
-    background-color: #0056b3;
+.brandBtn {
+  background: linear-gradient(180deg, #896efd 0, #6b4afc 100%);
+  height: 44px;
+  width: 100%;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 24px;
+  text-align: center;
+  color: #efeff1;
+  border-radius: 8px;
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.brandBtn:hover {
+  background: linear-gradient(180deg, #6b4afc 0, #563bca 100%);
+}
+
+.waitlistForm {
+  box-shadow: 0 0 4px #e595ff, 0 0 48px rgba(130, 26, 250, 0.5);
+  display: flex;
+  flex-flow: row;
+  place-content: center;
+  align-items: center;
+  padding: 4px;
+  background-color: rgba(161, 138, 255, 0.24);
+  border-radius: 12px;
+  margin: 10px auto 24px;
+  width: 204px;
 }
